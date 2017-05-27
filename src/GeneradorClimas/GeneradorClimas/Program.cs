@@ -2,7 +2,6 @@
 using log4net.Config;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace GeneradorClimas
@@ -22,43 +21,43 @@ namespace GeneradorClimas
             for (int i = 0; i < CANTIDAD_AÑOS * CANTIDAD_DIAS_AÑO; i++)
             {
                 sistemasSolar.AvanzarDia();
-                //Console.ReadLine();
             }
 
+            Console.ReadLine();
         }
     }
 
 
     public class Angulo
     {
-        double angle;
+        public double Grados { get; private set; }
         public double Radianes { get; private set; }
         public double Inverso { get; private set; }
 
-        public Angulo(double _angle)
+        public Angulo(double grados)
         {
-            angle = _angle;
+            Grados = grados;
             ActualizarRadianes();
             ActualizarInverso();
         }
 
         private void ActualizarRadianes()
         {
-            Radianes = Math.PI * angle / 180.0;
+            Radianes = Math.PI * Grados / 180.0;
         }
 
         private void ActualizarInverso()
         {
-            Inverso = (angle + 180.0) % 360;
+            Inverso = (Grados + 180.0) % 360;
         }
 
         public void Increment(double inc)
         {
-            angle += inc;
-            if (angle > 360)
-                angle -= 360;
-            else if (angle < 0)
-                angle += 360;
+            Grados += inc;
+            if (Grados > 360)
+                Grados -= 360;
+            else if (Grados < 0)
+                Grados += 360;
 
             ActualizarRadianes();
             ActualizarInverso();
@@ -70,15 +69,16 @@ namespace GeneradorClimas
         }
         public override string ToString()
         {
-            return angle.ToString();
+            return Grados.ToString();
         }
+
         public override int GetHashCode()
         {
-            return angle.GetHashCode();
+            return Grados.GetHashCode();
         }
         public static implicit operator double(Angulo angleObj)
         {
-            return angleObj.angle;
+            return angleObj.Grados;
         }
         public static implicit operator Angulo(double _angle)
         {
@@ -86,39 +86,86 @@ namespace GeneradorClimas
         }
         public static Angulo operator +(Angulo lhs, Angulo rhs)
         {
-            Angulo angle = new Angulo(lhs.angle);
-            angle.Increment(rhs.angle);
+            Angulo angle = new Angulo(lhs.Grados);
+            angle.Increment(rhs.Grados);
             return angle;
         }
         public static Angulo operator -(Angulo lhs, Angulo rhs)
         {
-            Angulo angle = new Angulo(lhs.angle);
-            angle.Decrement(rhs.angle);
+            Angulo angle = new Angulo(lhs.Grados);
+            angle.Decrement(rhs.Grados);
             return angle;
         }
         public static bool operator <(Angulo lhs, Angulo rhs)
         {
-            if (lhs.angle < rhs.angle)
+            if (lhs.Grados < rhs.Grados)
                 return true;
             return false;
         }
         public static bool operator <=(Angulo lhs, Angulo rhs)
         {
-            if (lhs.angle <= rhs.angle)
+            if (lhs.Grados <= rhs.Grados)
                 return true;
             return false;
         }
         public static bool operator >(Angulo lhs, Angulo rhs)
         {
-            if (lhs.angle > rhs.angle)
+            if (lhs.Grados > rhs.Grados)
                 return true;
             return false;
         }
         public static bool operator >=(Angulo lhs, Angulo rhs)
         {
-            if (lhs.angle >= rhs.angle)
+            if (lhs.Grados >= rhs.Grados)
                 return true;
             return false;
+        }
+
+        public static bool operator ==(Angulo lhs, Angulo rhs)
+        {
+            if (System.Object.ReferenceEquals(lhs, rhs))
+            {
+                return true;
+            }
+
+            if (((object)lhs == null) || ((object)rhs == null))
+            {
+                return false;
+            }
+
+            return lhs.Grados == rhs.Grados;
+        }
+
+        public static bool operator !=(Angulo lhs, Angulo rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+
+        public override bool Equals(System.Object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Angulo p = obj as Angulo;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            return (Grados == p.Grados);
+        }
+
+        public bool Equals(Angulo p)
+        {
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            return (Grados == p.Grados);
         }
 
     }
@@ -137,7 +184,66 @@ namespace GeneradorClimas
         {
             return string.Format("X:{0} Y:{1}", X, Y);
         }
+
+
+        public static bool operator ==(Punto lhs, Punto rhs)
+        {
+            if (System.Object.ReferenceEquals(lhs, rhs))
+            {
+                return true;
+            }
+
+            if (((object)lhs == null) || ((object)rhs == null))
+            {
+                return false;
+            }
+
+            return lhs.X == rhs.X && lhs.Y == rhs.Y;
+        }
+
+        public static bool operator !=(Punto lhs, Punto rhs)
+        {
+            return !(lhs == rhs);
+        }
+
+
+        public override bool Equals(System.Object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Punto p = obj as Punto;
+            if ((System.Object)p == null)
+            {
+                return false;
+            }
+
+            return X == p.X && Y == p.Y;
+        }
+
+        public bool Equals(Punto p)
+        {
+            if ((object)p == null)
+            {
+                return false;
+            }
+
+            return X == p.X && Y == p.Y;
+        }
+
+        public override int GetHashCode()
+        {
+            return X.GetHashCode() ^ Y.GetHashCode();
+        }
     }
+
+    public enum Clima
+    {
+        Sequia, LLuvia, Optimo, NoDefinido
+    }
+
 
     public class Planeta
     {
@@ -167,8 +273,7 @@ namespace GeneradorClimas
 
         public void Mover()
         {
-            AnguloActual = AnguloActual + VelocidadAngular;
-
+            AnguloActual += VelocidadAngular;
             ActualizarPosicionActual();
         }
     }
@@ -177,23 +282,27 @@ namespace GeneradorClimas
     {
         private static readonly ILog logger = LogManager.GetLogger(typeof(SistemaSolar));
 
-        readonly List<Planeta> planetas = new List<Planeta>(3);
+        private readonly List<Planeta> planetas = new List<Planeta>(3);
+        private Punto sol = new Punto(0, 0);
+
+        public List<Clima> Climas { get; private set; }
+
+        public int? DiaMaxLLuvia;
+        private double? perimetroMaxLluvia;
+
+        private int diaActual;
 
         public SistemaSolar()
         {
             planetas.Add(new Planeta("Ferengi", 500, -1));
             planetas.Add(new Planeta("Betasoide", 2000, -3));
             planetas.Add(new Planeta("Vulcano", 1000, 5));
+            Climas = new List<Clima>();
+            Climas.Add(CalcularClima());
         }
 
-        public void AvanzarDia()
+        private Clima CalcularClima()
         {
-            foreach (var planeta in planetas)
-            {
-                logger.Info(string.Format("Planeta -> {0} Angulo {1} {2} Pos {3}", planeta.Nombre, planeta.AnguloActual, planeta.AnguloActual.Inverso, planeta.PosicionActual));
-                planeta.Mover();
-            }
-
             if (PlanetasAlineadosConSol())
             {
                 logger.Info("Planetas alineados con el sol");
@@ -202,18 +311,96 @@ namespace GeneradorClimas
                 {
                     logger.Info(string.Format("Planeta -> {0} Angulo {1} {2} Pos {3}", planeta.Nombre, planeta.AnguloActual, planeta.AnguloActual.Inverso, planeta.PosicionActual));
                 }
-
-                Console.ReadLine();
+                return Clima.Sequia;
             }
 
+            if (PuntosColineares(planetas[0].PosicionActual, planetas[1].PosicionActual, planetas[2].PosicionActual))
+            {
+                logger.Info("Planetas Colineares");
 
+                foreach (var planeta in planetas)
+                {
+                    logger.Info(string.Format("Planeta -> {0} Angulo {1} {2} Pos {3}", planeta.Nombre, planeta.AnguloActual, planeta.AnguloActual.Inverso, planeta.PosicionActual));
+                }
+                return Clima.Optimo;
+            }
+
+            if (PuntoEnTriangulo(sol, planetas[0].PosicionActual, planetas[1].PosicionActual, planetas[2].PosicionActual))
+            {
+                logger.Info("Sol en triangulo");
+
+                foreach (var planeta in planetas)
+                {
+                    logger.Info(string.Format("Planeta -> {0} Angulo {1} {2} Pos {3}", planeta.Nombre, planeta.AnguloActual, planeta.AnguloActual.Inverso, planeta.PosicionActual));
+                }
+
+                var perimetro = Perimetro(planetas[0].PosicionActual, planetas[1].PosicionActual, planetas[2].PosicionActual);
+                logger.Info(string.Format("Perimetro -> {0}", perimetro));
+
+
+                if ((DiaMaxLLuvia == null) || perimetro >= perimetroMaxLluvia)
+                {
+                    DiaMaxLLuvia = diaActual;
+                    perimetroMaxLluvia = perimetro;
+                }
+
+                return Clima.LLuvia;
+            }
+
+            logger.Info("Clima no definido");
+            return Clima.NoDefinido;
+        }
+
+        public void AvanzarDia()
+        {
+            diaActual++;
+
+            foreach (var planeta in planetas)
+            {
+                logger.Info(string.Format("Planeta -> {0} Angulo {1} {2} Pos {3}", planeta.Nombre, planeta.AnguloActual, planeta.AnguloActual.Inverso, planeta.PosicionActual));
+                planeta.Mover();
+            }
+
+            Climas.Add(CalcularClima());
+        }
+
+        public double Perimetro(Punto p1, Punto p2, Punto p3)
+        {
+            return DistanciaEntreDosPuntos(p1, p2) + DistanciaEntreDosPuntos(p2, p3) + DistanciaEntreDosPuntos(p1, p3);
+        }
+
+        public double DistanciaEntreDosPuntos(Punto p1, Punto p2)
+        {
+            double a = p2.X - p1.X;
+            double b = p2.Y - p1.Y;
+            return Math.Sqrt(a * a + b * b);
+        }
+
+        private bool PuntosColineares(Punto p1, Punto p2, Punto p3)
+        {
+            return ((int)p2.Y - (int)p1.Y) / ((int)p2.X - (int)p1.X) == ((int)p3.Y - (int)p1.Y) / ((int)p3.X - (int)p1.X);
+        }
+
+        private double Sign(Punto p1, Punto p2, Punto p3)
+        {
+            return (p1.X - p3.X) * (p2.Y - p3.Y) - (p2.X - p3.X) * (p1.Y - p3.Y);
+        }
+
+        private bool PuntoEnTriangulo(Punto pt, Punto v1, Punto v2, Punto v3)
+        {
+            bool b1, b2, b3;
+
+            b1 = Sign(pt, v1, v2) < 0.0;
+            b2 = Sign(pt, v2, v3) < 0.0;
+            b3 = Sign(pt, v3, v1) < 0.0;
+
+            return ((b1 == b2) && (b2 == b3));
         }
 
         private bool PlanetasAlineadosConSol()
         {
             var first = planetas.First();
             return planetas.All(x => x.AnguloActual == first.AnguloActual || x.AnguloActual == first.AnguloActual.Inverso);
-
         }
     }
 }
