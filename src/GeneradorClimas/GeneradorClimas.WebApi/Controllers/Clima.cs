@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using GeneradorClimas.WebApi.Models;
 
 namespace GeneradorClimas.WebApi.Controllers
 {
@@ -18,18 +19,8 @@ namespace GeneradorClimas.WebApi.Controllers
                     Clima = clima.Value.ToString()
                 });
             }
-            else
-            {
-                HttpError err = new HttpError("El dia solicitado no existe");
-                return Request.CreateErrorResponse( HttpStatusCode.NotFound,err);
-            }
+            var err = new HttpError("El dia solicitado no existe");
+            return Request.CreateErrorResponse( HttpStatusCode.NotFound,err);
         }
     }
-
-    public class Resultado
-    {
-        public int Dia { get; set; }
-        public string Clima { get; set; }
-    }
-
 }
