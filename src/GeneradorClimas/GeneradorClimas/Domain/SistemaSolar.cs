@@ -99,12 +99,12 @@ namespace GeneradorClimas.Domain
             Climas.Add(CalcularClima());
         }
 
-        public double Perimetro(Punto p1, Punto p2, Punto p3)
+        private double Perimetro(Punto p1, Punto p2, Punto p3)
         {
             return DistanciaEntreDosPuntos(p1, p2) + DistanciaEntreDosPuntos(p2, p3) + DistanciaEntreDosPuntos(p1, p3);
         }
 
-        public double DistanciaEntreDosPuntos(Punto p1, Punto p2)
+        private double DistanciaEntreDosPuntos(Punto p1, Punto p2)
         {
             double a = p2.X - p1.X;
             double b = p2.Y - p1.Y;
