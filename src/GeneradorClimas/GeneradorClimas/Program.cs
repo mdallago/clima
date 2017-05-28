@@ -8,22 +8,52 @@ namespace GeneradorClimas
 {
     class Program
     {
+        private static readonly ILog logger = LogManager.GetLogger(typeof(Program));
+
         static void Main(string[] args)
         {
             const int CANTIDAD_DIAS_AÑO = 365;
-            const int CANTIDAD_AÑOS = 1;
+            const int CANTIDAD_AÑOS = 10;
+            const int CANTIDAD_DIAS = CANTIDAD_DIAS_AÑO * CANTIDAD_AÑOS;
 
             XmlConfigurator.ConfigureAndWatch(
                 new System.IO.FileInfo(AppDomain.CurrentDomain.BaseDirectory + @"\log4net.config"));
 
             SistemaSolar sistemasSolar = new SistemaSolar();
 
-            for (int i = 0; i < CANTIDAD_AÑOS * CANTIDAD_DIAS_AÑO; i++)
+            for (int i = 0; i < CANTIDAD_DIAS - 1; i++)
             {
                 sistemasSolar.AvanzarDia();
             }
 
-            Console.ReadLine();
+
+            var group = sistemasSolar.Climas
+                                    .Where(x => x != Clima.NoDefinido)
+                                    .GroupBy(x => x)
+                                    .Select(g => new
+                                    {
+                                        Clima = g.Key,
+                                        Cantidad = g.Count()
+                                    });
+
+            logger.Info("Resultado del analisis de clima");
+
+            logger.Info(string.Format( "Se analizaron {0} dias", sistemasSolar.Climas.Count));
+
+            foreach (var item in group)
+            {
+                logger.Info(string.Format("Clima {0} -> {1} dias", item.Clima, item.Cantidad));
+            }
+
+            logger.Info("Dias con picos maximos de lluvia");
+
+            foreach (var item in sistemasSolar.DiasMaxLLuvia)
+            {
+                logger.Info(string.Format( "Dia Nro -> {0}" ,item));
+            }
+
+
+            System.IO.File.WriteAllLines("resultado.txt", sistemasSolar.Climas.Select(x => ((byte)x).ToString()).ToArray());
         }
     }
 
@@ -239,11 +269,10 @@ namespace GeneradorClimas
         }
     }
 
-    public enum Clima
+    public enum Clima:byte
     {
-        Sequia, LLuvia, Optimo, NoDefinido
+        Sequia, Lluvia, Optimo, NoDefinido
     }
-
 
     public class Planeta
     {
@@ -287,7 +316,7 @@ namespace GeneradorClimas
 
         public List<Clima> Climas { get; private set; }
 
-        public int? DiaMaxLLuvia;
+        public List<int> DiasMaxLLuvia;
         private double? perimetroMaxLluvia;
 
         private int diaActual;
@@ -338,13 +367,19 @@ namespace GeneradorClimas
                 logger.Info(string.Format("Perimetro -> {0}", perimetro));
 
 
-                if ((DiaMaxLLuvia == null) || perimetro >= perimetroMaxLluvia)
+                if ((DiasMaxLLuvia == null) || perimetro > perimetroMaxLluvia)
                 {
-                    DiaMaxLLuvia = diaActual;
+                    logger.Info(string.Format("Dia con mas lluvia {0}", diaActual));
+                    DiasMaxLLuvia = new List<int>();
+                    DiasMaxLLuvia.Add(diaActual);
                     perimetroMaxLluvia = perimetro;
                 }
-
-                return Clima.LLuvia;
+                else if (perimetro == perimetroMaxLluvia)
+                {
+                    DiasMaxLLuvia.Add(diaActual);
+                }
+                
+                return Clima.Lluvia;
             }
 
             logger.Info("Clima no definido");
